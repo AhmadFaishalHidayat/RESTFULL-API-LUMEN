@@ -18,9 +18,18 @@ $router->get('/', function () use ($router) {
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('/posts', 'PostController@index');
-    $router->get('/posts/{id}', 'PostController@show');
-    $router->post('/posts', 'PostController@store');
-    $router->put('/posts/{id}', 'PostController@update');
-    $router->delete('/posts/{id}', 'PostController@destroy');
+    $router->group(['prefix' => 'categories'], function () use ($router) {
+        $router->get('/', 'CategoryController@index');
+        $router->get('/{id}', 'CategoryController@show');
+        $router->post('/', 'CategoryController@store');
+        $router->put('/{id}', 'CategoryController@update');
+        $router->delete('/{id}', 'CategoryController@destroy');
+    });
+    $router->group(['prefix' => 'posts'], function () use ($router) {
+        $router->get('/', 'PostController@index');
+        $router->get('/{id}', 'PostController@show');
+        $router->post('/', 'PostController@store');
+        $router->put('/{id}', 'PostController@update');
+        $router->delete('/{id}', 'PostController@destroy');
+    });
 });

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class PostController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -21,7 +21,7 @@ class PostController extends Controller
     public function index()
     {
         try {
-            return response()->json(Post::all(), 200);
+            return response()->json(Category::all(), 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
@@ -33,12 +33,15 @@ class PostController extends Controller
     public function show($id)
     {
         try {
-            $post = Post::find($id);
-            if (!$post) {
-                return response()->json(['message' => 'Not Found'], 404);
+            $category = Category::find($id);
+            if (!$category) {
+                return response()->json([
+                    'message' => 'Not Found',
+                    'status' => 404
+                ], 404);
             }
             return response()->json([
-                'data' => $post,
+                'data' => $category,
                 'status' => 200
             ], 200);
         } catch (\Exception $e) {
@@ -53,23 +56,21 @@ class PostController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'title'   => 'required|min:5',
-                'content' => 'required|min:10',
-                'category_id' => 'required|exists:categories,id',
+                'name' => 'required|min:3|unique:categories,name|max:255',
             ]);
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'validasi gagal',
+                    'message' => 'Validation failed',
                     'errors' => $validator->errors(),
                 ], 422);
             }
 
-            $post = Post::create($request->only(['title', 'content', 'category_id']));
+            $category = Category::create($request->only(['name']));
             return response()->json([
                 'success' => true,
-                'message' => 'Post berhasil dibuat',
-                'data'    => $post,
+                'message' => 'Category created successfully',
+                'data'    => $category,
                 'status' => 201
             ], 201);
         } catch (\Exception $e) {
@@ -83,14 +84,15 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $post = Post::find($id);
-            if (!$post) {
-                return response()->json(['message' => 'Not Found'], 404);
+            $category = Category::find($id);
+            if (!$category) {
+                return response()->json([
+                    'message' => 'Not Found',
+                    'status' => 404
+                ], 404);
             }
             $validator = Validator::make($request->all(), [
-                'title'   => 'sometimes|required|min:5',
-                'content' => 'sometimes|required|min:10',
-                'category_id' => 'sometimes|required|exists:categories,id',
+                'name' => 'sometimes|required|string|max:255|unique:categories,name,' . $id,
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -100,11 +102,10 @@ class PostController extends Controller
                 ], 422);
             }
 
-            $post->update($request->only(['title', 'content', 'category_id']));
+            $category->update($request->only(['name']));
             return response()->json([
-                'success' => true,
-                'message' => 'Post updated successfully',
-                'data' => $post,
+                'message' => 'Category updated successfully',
+                'data' => $category,
                 'status' => 200
             ], 200);
         } catch (\Exception $e) {
@@ -118,13 +119,17 @@ class PostController extends Controller
     public function destroy($id)
     {
         try {
-            $post = Post::find($id);
-            if (!$post) {
-                return response()->json(['message' => 'Not Found'], 404);
+            $category = Category::find($id);
+            if (!$category) {
+                return response()->json([
+                    'message' => 'Not Found',
+                    'status' => 404
+                ], 404);
             }
-            $post->delete();
+
+            $category->delete();
             return response()->json([
-                'message' => 'Deleted Successfully',
+                'message' => 'Category deleted successfully',
                 'status' => 200
             ], 200);
         } catch (\Exception $e) {
