@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 use App\Models\Post;
 use Faker\Factory as Faker;
@@ -11,6 +12,13 @@ class PostSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create('id_ID'); // Locale Indonesia
+
+        if (app()->environment('local')) {
+            if ($this->command->confirm('Do you want to truncate the posts table?', true)) {
+                Post::truncate(); // Hapus semua data sebelum isi ulang
+                $this->command->info('Table truncated.');
+            }
+        }
 
         // Implementasi untuk membuat 20 data post menggunakan Faker agar menggunakan bahasa Indonesia
         $titles = [
@@ -119,20 +127,7 @@ class PostSeeder extends Seeder
             "JWT (JSON Web Token) digunakan untuk autentikasi aman dan scalable di API."
         ];
 
-        if (app()->environment('local')) {
-            if ($this->command->confirm('Do you want to truncate the posts table?', true)) {
-                Post::truncate();
-                $this->command->info('Table truncated.');
-            }
-        };
-
-        // foreach (range(1, 10) as $i) {
-        //     Post::create([
-        //         'title' => "Post ke-$i",
-        //         'content' => "Ini konten dari post nomor $i yang dibuat lewat seeder."
-        //     ]);
-        // }
-        // $this->command->info('PostSeeder executed!');
+        $categories = Category::all();
 
         $data = []; // Ini akan menampung semua post yang dibuat
 
@@ -140,6 +135,7 @@ class PostSeeder extends Seeder
             $post = Post::create([
                 'title' => $faker->randomElement($titles),
                 'content' => $faker->randomElement($contents),
+                'category_id' => $faker->randomElement($categories)->id,
             ]);
             $data[] = $post; // Masukkan post ke dalam array $data
         };

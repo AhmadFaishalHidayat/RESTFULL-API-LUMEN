@@ -14,11 +14,16 @@ class CreatePostsTable extends Migration
     public function up()
     {
         Schema::create('posts', function (Blueprint $table) {
-            $table->id();
+            $table->engine = 'InnoDB';
+
+            $table->increments('id');
+            $table->unsignedInteger('category_id'); // wajib punya category_id
             $table->string('title');
             $table->text('content');
             $table->timestamps();
             $table->softDeletes();
+            // Menambahkan foreign key untuk category_id
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }
 
