@@ -18,12 +18,15 @@ class CreatePostsTable extends Migration
 
             $table->increments('id');
             $table->unsignedInteger('category_id'); // wajib punya category_id
+            $table->unsignedInteger('user_id'); // wajib punya user_id
             $table->string('title');
             $table->text('content');
             $table->timestamps();
             $table->softDeletes();
             // Menambahkan foreign key untuk category_id
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
+            // Menambahkan foreign key untuk user_id
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

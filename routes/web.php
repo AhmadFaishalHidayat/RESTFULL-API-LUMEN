@@ -21,15 +21,24 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->group(['prefix' => 'categories'], function () use ($router) {
         $router->get('/', 'CategoryController@index');
         $router->get('/{id}', 'CategoryController@show');
+        $router->get('/{id}/posts', 'CategoryController@showPostsByCategory');
+
         $router->post('/', 'CategoryController@store');
         $router->put('/{id}', 'CategoryController@update');
         $router->delete('/{id}', 'CategoryController@destroy');
     });
-    $router->group(['prefix' => 'posts'], function () use ($router) {
+    $router->group(['prefix' => 'posts', 'middleware' => 'auth'], function () use ($router) {
         $router->get('/', 'PostController@index');
         $router->get('/{id}', 'PostController@show');
+        $router->get('/filter', 'PostController@getFiltered');
         $router->post('/', 'PostController@store');
         $router->put('/{id}', 'PostController@update');
         $router->delete('/{id}', 'PostController@destroy');
+    });
+
+    $router->group(['prefix' => 'auth'], function () use ($router) {
+        $router->post('/register', 'AuthController@register');
+        $router->post('/login', 'AuthController@login');
+        // $router->post('/logout', 'AuthController@logout');
     });
 });

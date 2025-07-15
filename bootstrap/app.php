@@ -28,6 +28,8 @@ $app->withFacades();
 $app->withEloquent();
 
 $app->register(Illuminate\Validation\ValidationServiceProvider::class);
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +64,8 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('auth');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -78,9 +82,9 @@ $app->configure('app');
 //     App\Http\Middleware\ExampleMiddleware::class
 // ]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+$app->routeMiddleware([
+    'auth' => App\Http\Middleware\Authenticate::class,
+]);
 
 /*
 |--------------------------------------------------------------------------
