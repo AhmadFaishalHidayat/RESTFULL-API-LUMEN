@@ -21,10 +21,11 @@ class PostController extends Controller
     public function index()
     {
         try {
-            return response()->json(Post::all(), 200);
+            return response()->json(Post::with('category')->get(), 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -33,7 +34,7 @@ class PostController extends Controller
     public function show($id)
     {
         try {
-            $post = Post::find($id);
+            $post = Post::with('category')->find($id);
             if (!$post) {
                 return response()->json(['message' => 'Not Found'], 404);
             }
@@ -44,6 +45,7 @@ class PostController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -60,9 +62,10 @@ class PostController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'validasi gagal',
+                    'message' => 'Bad Request',
+                    'status' => 400,
                     'errors' => $validator->errors(),
-                ], 422);
+                ], 400);
             }
 
             $post = Post::create($request->only(['title', 'content', 'category_id']));
@@ -75,6 +78,7 @@ class PostController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -95,9 +99,10 @@ class PostController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => 'Bad Request',
+                    'status' => 400,
                     'errors' => $validator->errors(),
-                ], 422);
+                ], 400);
             }
 
             $post->update($request->only(['title', 'content', 'category_id']));
@@ -110,6 +115,7 @@ class PostController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -130,6 +136,65 @@ class PostController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getFiltered(Request $request)
+    {
+        try {
+            // Ambil input
+            $limit  = $request->input('limit') ?? 10;
+            $offset = $request->input('offset') ?? 0;
+
+            // Ambil filter (JSON)
+            $filter = json_decode($request->input('filter'), true);
+            if ($filter == null) {
+                $filter = json_decode(urldecode($request->input('filter')), true);
+            }
+
+            // Ambil sort (JSON)
+            $sort = json_decode($request->input('sort'), true);
+            if ($sort == null) {
+                $sort = json_decode(urldecode($request->input('sort')), true);
+            }
+
+            // Build query
+            $query = Post::query();
+
+            // Apply filter
+            if ($filter && isset($filter['category_id'])) {
+                $query->where('category_id', $filter['category_id']);
+            }
+
+            // Apply sort
+            if ($sort && isset($sort['field']) && isset($sort['dir'])) {
+                $query->orderBy($sort['field'], $sort['dir']);
+            } else {
+                $query->orderBy('created_at', 'desc'); // default
+            }
+
+            // Total data (tanpa limit)
+            $total = $query->count();
+
+            // Ambil data sesuai limit & offset
+            $posts = $query->skip($offset)->take($limit)->get();
+
+            return response()->json([
+                'success' => true,
+                'data'    => $posts,
+                'meta'    => [
+                    'total'  => $total,
+                    'limit'  => (int) $limit,
+                    'offset' => (int) $offset
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
                 'error'   => $e->getMessage()
             ], 500);
         }

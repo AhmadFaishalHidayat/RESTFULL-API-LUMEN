@@ -25,6 +25,7 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -47,6 +48,7 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -61,9 +63,10 @@ class CategoryController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => 'Bad Request',
+                    'status' => 400,
                     'errors' => $validator->errors(),
-                ], 422);
+                ], 400);
             }
 
             $category = Category::create($request->only(['name']));
@@ -76,6 +79,7 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -97,9 +101,10 @@ class CategoryController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => 'Bad Request',
+                    'status' => 400,
                     'errors' => $validator->errors(),
-                ], 422);
+                ], 400);
             }
 
             $category->update($request->only(['name']));
@@ -111,6 +116,7 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -135,7 +141,28 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',
+                'status' => 500,
                 'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function showPostsByCategory($id)
+    {
+        try {
+            $category = Category::with('posts')->find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Not Found'], 404);
+            }
+            return response()->json([
+                'data' => $category,
+                'status' => 200
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Internal Server Error',
+                'status' => 500,
+                'error' => $e->getMessage()
             ], 500);
         }
     }
