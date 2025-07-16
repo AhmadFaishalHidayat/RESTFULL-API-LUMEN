@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Category;
 use Illuminate\Database\Seeder;
 use App\Models\Post;
+use App\Models\User;
 use Faker\Factory as Faker;
 
 class PostSeeder extends Seeder
@@ -12,13 +13,6 @@ class PostSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create('id_ID'); // Locale Indonesia
-
-        if (app()->environment('local')) {
-            if ($this->command->confirm('Do you want to truncate the posts table?', true)) {
-                Post::truncate(); // Hapus semua data sebelum isi ulang
-                $this->command->info('Table truncated.');
-            }
-        }
 
         // Implementasi untuk membuat 20 data post menggunakan Faker agar menggunakan bahasa Indonesia
         $titles = [
@@ -128,6 +122,7 @@ class PostSeeder extends Seeder
         ];
 
         $categories = Category::all();
+        $users = User::all();
 
         $data = []; // Ini akan menampung semua post yang dibuat
 
@@ -136,6 +131,7 @@ class PostSeeder extends Seeder
                 'title' => $faker->randomElement($titles),
                 'content' => $faker->randomElement($contents),
                 'category_id' => $faker->randomElement($categories)->id,
+                'user_id' => $faker->randomElement($users)->id
             ]);
             $data[] = $post; // Masukkan post ke dalam array $data
         };

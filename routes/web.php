@@ -29,8 +29,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     });
     $router->group(['prefix' => 'posts', 'middleware' => 'auth'], function () use ($router) {
         $router->get('/', 'PostController@index');
-        $router->get('/{id}', 'PostController@show');
         $router->get('/filter', 'PostController@getFiltered');
+        $router->get('/{id}', 'PostController@show');
         $router->post('/', 'PostController@store');
         $router->put('/{id}', 'PostController@update');
         $router->delete('/{id}', 'PostController@destroy');
@@ -42,3 +42,9 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // $router->post('/logout', 'AuthController@logout');
     });
 });
+
+$router->get('/admin-only', ['middleware' => 'role:editor', function () {
+    return 'This route only accessible by editor.';
+}]);
+
+$router->post('/post/create', ['middleware' => 'permission:create-post', 'uses' => 'PostController@store']);

@@ -84,7 +84,10 @@ $app->configure('auth');
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+    'role' => App\Http\Middleware\CheckRole::class,
+    'permission' => App\Http\Middleware\CheckPermission::class,
 ]);
+
 
 /*
 |--------------------------------------------------------------------------
