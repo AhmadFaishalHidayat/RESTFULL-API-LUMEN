@@ -3,8 +3,15 @@
 namespace Database\Seeders;
 
 // use App\Models\Post;
+
+use App\Models\Category;
+use App\Models\Permission;
+use App\Models\Post;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Database\Seeders\PostSeeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,18 +22,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call('UsersTableSeeder');
-        // Post::truncate(); // Hapus semua data sebelum isi ulang
+        if (app()->environment('local')) {
+            if ($this->command->confirm('Do you want to truncate the db table?', true)) {
+                // Nonaktifkan foreign key checks sementara
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // foreach (range(1, 20) as $i) {
-        //     Post::create([
-        //         'title' => "Judul Post ke-$i",
-        //         'content' => "Ini konten dari post nomor $i. Belajar Lumen sangat menyenangkan!"
-        //     ]);
-        // }
+                // Truncate tabel dengan urutan: anak -> induk
+                Post::truncate();
+                Role::truncate();
+                Permission::truncate();
+                Category::truncate();
+                User::truncate();
+
+                // Aktifkan kembali foreign key checks
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+                $this->command->info('All tables truncated successfully.');
+            }
+        }
 
         $this->call([
             CategorySeeder::class,
+            UserSeeder::class,
+            RoleSeeder::class,
+            PermissionSeeder::class,
+            AssignRolePermissionSeeder::class,
             PostSeeder::class,
         ]);
     }

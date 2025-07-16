@@ -21,6 +21,7 @@ class PostController extends Controller
     public function index()
     {
         try {
+            $user = auth()->user();
             return response()->json(Post::with('category')->get(), 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -54,6 +55,10 @@ class PostController extends Controller
     public function store(Request $request)
     {
         try {
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
             $validator = Validator::make($request->all(), [
                 'title'   => 'required|min:5',
                 'content' => 'required|min:10',
@@ -68,7 +73,12 @@ class PostController extends Controller
                 ], 400);
             }
 
-            $post = Post::create($request->only(['title', 'content', 'category_id']));
+            $post = Post::create([
+                'title'       => $request->input('title'),
+                'content'     => $request->input('content'),
+                'category_id' => $request->input('category_id'),
+                'user_id'     => $user->id
+            ]);
             return response()->json([
                 'success' => true,
                 'message' => 'Post berhasil dibuat',
@@ -87,6 +97,10 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
             $post = Post::find($id);
             if (!$post) {
                 return response()->json(['message' => 'Not Found'], 404);
@@ -105,7 +119,14 @@ class PostController extends Controller
                 ], 400);
             }
 
-            $post->update($request->only(['title', 'content', 'category_id']));
+            $post->update($request->only(
+                [
+                    'title'       => $request->input('title'),
+                    'content'     => $request->input('content'),
+                    'category_id' => $request->input('category_id'),
+                    'user_id'     => $user->id
+                ]
+            ));
             return response()->json([
                 'success' => true,
                 'message' => 'Post updated successfully',

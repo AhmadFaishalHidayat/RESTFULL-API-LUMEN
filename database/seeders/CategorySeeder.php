@@ -14,7 +14,6 @@ class CategorySeeder extends Seeder
      */
     public function run()
     {
-        //
         $categories = [
             'Programming',
             'Web Development',
